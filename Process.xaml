@@ -1,0 +1,339 @@
+<Activity mc:Ignorable="sap sap2010" x:Class="ProcessTransaction" xmlns="http://schemas.microsoft.com/netfx/2009/xaml/activities" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:mva="clr-namespace:Microsoft.VisualBasic.Activities;assembly=System.Activities" xmlns:sap="http://schemas.microsoft.com/netfx/2009/xaml/activities/presentation" xmlns:sap2010="http://schemas.microsoft.com/netfx/2010/xaml/activities/presentation" xmlns:scg="clr-namespace:System.Collections.Generic;assembly=mscorlib" xmlns:sd="clr-namespace:System.Data;assembly=System.Data" xmlns:snm="clr-namespace:System.Net.Mail;assembly=System" xmlns:ss="clr-namespace:System.Security;assembly=mscorlib" xmlns:str="clr-namespace:System.Text.RegularExpressions;assembly=System" xmlns:ui="http://schemas.uipath.com/workflow/activities" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <x:Members>
+    <x:Property Name="in_TransactionItem" Type="InArgument(snm:MailMessage)" />
+    <x:Property Name="in_Config" Type="InArgument(scg:Dictionary(x:String, x:Object))" />
+    <x:Property Name="in_Passwords" Type="InArgument(scg:Dictionary(x:String, ss:SecureString))" />
+  </x:Members>
+  <mva:VisualBasic.Settings>
+    <x:Null />
+  </mva:VisualBasic.Settings>
+  <sap:VirtualizedContainerService.HintSize>1214,4554</sap:VirtualizedContainerService.HintSize>
+  <sap2010:WorkflowViewState.IdRef>ProcessTransaction_1</sap2010:WorkflowViewState.IdRef>
+  <TextExpression.NamespacesForImplementation>
+    <scg:List x:TypeArguments="x:String" Capacity="48">
+      <x:String>System.Activities</x:String>
+      <x:String>System.Activities.Statements</x:String>
+      <x:String>System.Activities.Expressions</x:String>
+      <x:String>System.Activities.Validation</x:String>
+      <x:String>System.Activities.XamlIntegration</x:String>
+      <x:String>Microsoft.VisualBasic</x:String>
+      <x:String>Microsoft.VisualBasic.Activities</x:String>
+      <x:String>System</x:String>
+      <x:String>System.Collections</x:String>
+      <x:String>System.Collections.Generic</x:String>
+      <x:String>System.Data</x:String>
+      <x:String>System.Diagnostics</x:String>
+      <x:String>System.Drawing</x:String>
+      <x:String>System.IO</x:String>
+      <x:String>System.Linq</x:String>
+      <x:String>System.Net.Mail</x:String>
+      <x:String>System.Xml</x:String>
+      <x:String>System.Xml.Linq</x:String>
+      <x:String>UiPath.Core</x:String>
+      <x:String>UiPath.Core.Activities</x:String>
+      <x:String>System.Windows.Markup</x:String>
+      <x:String>System.Text.RegularExpressions</x:String>
+      <x:String>UiPath.Excel</x:String>
+      <x:String>System.Xml.Serialization</x:String>
+      <x:String>System.Reflection</x:String>
+      <x:String>System.Runtime.InteropServices</x:String>
+      <x:String>System.Collections.ObjectModel</x:String>
+      <x:String>System.Runtime.Serialization</x:String>
+      <x:String>System.Activities.DynamicUpdate</x:String>
+    </scg:List>
+  </TextExpression.NamespacesForImplementation>
+  <TextExpression.ReferencesForImplementation>
+    <scg:List x:TypeArguments="AssemblyReference" Capacity="50">
+      <AssemblyReference>System.Activities</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualBasic</AssemblyReference>
+      <AssemblyReference>mscorlib</AssemblyReference>
+      <AssemblyReference>System.Data</AssemblyReference>
+      <AssemblyReference>System</AssemblyReference>
+      <AssemblyReference>System.Drawing</AssemblyReference>
+      <AssemblyReference>System.Core</AssemblyReference>
+      <AssemblyReference>System.Xml</AssemblyReference>
+      <AssemblyReference>System.Xml.Linq</AssemblyReference>
+      <AssemblyReference>PresentationFramework</AssemblyReference>
+      <AssemblyReference>WindowsBase</AssemblyReference>
+      <AssemblyReference>PresentationCore</AssemblyReference>
+      <AssemblyReference>System.Xaml</AssemblyReference>
+      <AssemblyReference>System.ComponentModel.Composition</AssemblyReference>
+      <AssemblyReference>System.ServiceModel</AssemblyReference>
+      <AssemblyReference>Microsoft.VisualStudio.Services.Common</AssemblyReference>
+      <AssemblyReference>UiPath.UiAutomation.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.System.Activities</AssemblyReference>
+      <AssemblyReference>System.ValueTuple</AssemblyReference>
+      <AssemblyReference>UiPath.Python</AssemblyReference>
+      <AssemblyReference>UiPath.IntelligentOCR</AssemblyReference>
+      <AssemblyReference>UiPath.Java.Activities</AssemblyReference>
+      <AssemblyReference>UiPath.Mail</AssemblyReference>
+      <AssemblyReference>UiPath.PDF</AssemblyReference>
+      <AssemblyReference>UiPath.Excel</AssemblyReference>
+      <AssemblyReference>System.Runtime.InteropServices.RuntimeInformation</AssemblyReference>
+      <AssemblyReference>System.Runtime.Serialization</AssemblyReference>
+    </scg:List>
+  </TextExpression.ReferencesForImplementation>
+  <Sequence sap2010:Annotation.AnnotationText="Every TransactionItem is a MailMessage object and represent a mail sent to the bot for a QRL report request. Every item will be processed to check if a PO number is found in the body or in the subject and then check if the sender is in the whitelist" DisplayName="ProcessTransaction" sap:VirtualizedContainerService.HintSize="1224,4489" sap2010:WorkflowViewState.IdRef="Sequence_1">
+    <Sequence.Variables>
+      <Variable x:TypeArguments="x:String" Name="regEx" />
+      <Variable x:TypeArguments="scg:IEnumerable(str:Match)" Name="subjectMatches" />
+      <Variable x:TypeArguments="scg:IEnumerable(str:Match)" Name="bodyMatches" />
+      <Variable x:TypeArguments="scg:List(x:String)" Name="poList" />
+      <Variable x:TypeArguments="sd:DataTable" Name="dtWhiteList" />
+      <Variable x:TypeArguments="sd:DataRow[]" Name="filteredDT" />
+      <Variable x:TypeArguments="scg:IEnumerable(str:Match)" Name="mailMatches" />
+      <Variable x:TypeArguments="x:Boolean" Name="notAllowed" />
+    </Sequence.Variables>
+    <sap:WorkflowViewStateService.ViewState>
+      <scg:Dictionary x:TypeArguments="x:String, x:Object">
+        <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+        <x:Boolean x:Key="IsAnnotationDocked">True</x:Boolean>
+      </scg:Dictionary>
+    </sap:WorkflowViewStateService.ViewState>
+    <Assign sap:VirtualizedContainerService.HintSize="1182,60" sap2010:WorkflowViewState.IdRef="Assign_2">
+      <Assign.To>
+        <OutArgument x:TypeArguments="scg:List(x:String)">[poList]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="scg:List(x:String)">[new List(Of String)]</InArgument>
+      </Assign.Value>
+    </Assign>
+    <ui:Comment sap:VirtualizedContainerService.HintSize="1182,74" sap2010:WorkflowViewState.IdRef="Comment_1" Text="// Match the subject of the mail throught the regex defined in the orchestrator asset" />
+    <ui:Matches sap:VirtualizedContainerService.HintSize="1182,22" sap2010:WorkflowViewState.IdRef="Matches_1" Input="[in_TransactionItem.Subject.ToString]" Pattern="[in_Config(&quot;RegExPO&quot;).ToString]" RegexOption="IgnoreCase, Multiline, Compiled, CultureInvariant" Result="[subjectMatches]" />
+    <ui:Comment sap:VirtualizedContainerService.HintSize="1182,74" sap2010:WorkflowViewState.IdRef="Comment_2" Text="// Match the body of the mail throught the regex defined in the orchestrator asset" />
+    <ui:Matches sap:VirtualizedContainerService.HintSize="1182,22" sap2010:WorkflowViewState.IdRef="Matches_2" Input="[in_TransactionItem.Body.ToString]" Pattern="[in_Config(&quot;RegExPO&quot;).ToString]" RegexOption="IgnoreCase, Compiled" Result="[bodyMatches]" />
+    <ui:ForEach x:TypeArguments="str:Match" CurrentIndex="{x:Null}" DisplayName="For Each" sap:VirtualizedContainerService.HintSize="1182,828" sap2010:WorkflowViewState.IdRef="ForEach`1_1" Values="[subjectMatches]">
+      <ui:ForEach.Body>
+        <ActivityAction x:TypeArguments="str:Match">
+          <ActivityAction.Argument>
+            <DelegateInArgument x:TypeArguments="str:Match" Name="item" />
+          </ActivityAction.Argument>
+          <Sequence DisplayName="Body" sap:VirtualizedContainerService.HintSize="839,694" sap2010:WorkflowViewState.IdRef="Sequence_3">
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+            <ui:Comment sap:VirtualizedContainerService.HintSize="797,74" sap2010:WorkflowViewState.IdRef="Comment_8" Text="// Looking for the PO number in the subject of the mail" />
+            <If Condition="[poList.Contains(item.Value)]" sap:VirtualizedContainerService.HintSize="797,488" sap2010:WorkflowViewState.IdRef="If_2">
+              <If.Then>
+                <Sequence sap:VirtualizedContainerService.HintSize="376,278" sap2010:WorkflowViewState.IdRef="Sequence_7">
+                  <sap:WorkflowViewStateService.ViewState>
+                    <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                      <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                    </scg:Dictionary>
+                  </sap:WorkflowViewStateService.ViewState>
+                  <ui:Comment sap:VirtualizedContainerService.HintSize="334,55" sap2010:WorkflowViewState.IdRef="Comment_3" Text="// Nothing to do. The PO is already in list" />
+                  <ui:LogMessage DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,91" sap2010:WorkflowViewState.IdRef="LogMessage_1" Level="Info" Message="[&quot;A match is already inserted in the list for PO &quot; + item.Value]" />
+                </Sequence>
+              </If.Then>
+              <If.Else>
+                <Sequence sap:VirtualizedContainerService.HintSize="376,340" sap2010:WorkflowViewState.IdRef="Sequence_2">
+                  <sap:WorkflowViewStateService.ViewState>
+                    <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                      <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                    </scg:Dictionary>
+                  </sap:WorkflowViewStateService.ViewState>
+                  <ui:Comment sap:VirtualizedContainerService.HintSize="334,55" sap2010:WorkflowViewState.IdRef="Comment_4" Text="// Adding the PO number to the final list" />
+                  <AddToCollection x:TypeArguments="x:String" Collection="[poList]" DisplayName="Add To Collection" sap:VirtualizedContainerService.HintSize="334,22" sap2010:WorkflowViewState.IdRef="AddToCollection`1_1" Item="[item.Value]" />
+                  <ui:LogMessage DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,91" sap2010:WorkflowViewState.IdRef="LogMessage_2" Level="Info" Message="[&quot;Adding to the queue the PO N. &quot; + item.Value]" />
+                </Sequence>
+              </If.Else>
+            </If>
+          </Sequence>
+        </ActivityAction>
+      </ui:ForEach.Body>
+    </ui:ForEach>
+    <ui:Comment sap:VirtualizedContainerService.HintSize="1182,74" sap2010:WorkflowViewState.IdRef="Comment_9" Text="// Looking for the PO number in the body of the mail" />
+    <ui:ForEach x:TypeArguments="str:Match" CurrentIndex="{x:Null}" DisplayName="For Each" sap:VirtualizedContainerService.HintSize="1182,714" sap2010:WorkflowViewState.IdRef="ForEach`1_2" Values="[bodyMatches]">
+      <ui:ForEach.Body>
+        <ActivityAction x:TypeArguments="str:Match">
+          <ActivityAction.Argument>
+            <DelegateInArgument x:TypeArguments="str:Match" Name="item" />
+          </ActivityAction.Argument>
+          <Sequence DisplayName="Body" sap:VirtualizedContainerService.HintSize="797,580" sap2010:WorkflowViewState.IdRef="Sequence_5">
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+            <If Condition="[poList.Contains(item.Value)]" sap:VirtualizedContainerService.HintSize="755,488" sap2010:WorkflowViewState.IdRef="If_3">
+              <If.Then>
+                <ui:Comment sap:VirtualizedContainerService.HintSize="334,55" sap2010:WorkflowViewState.IdRef="Comment_5" Text="// Nothing to do. The PO is already in list" />
+              </If.Then>
+              <If.Else>
+                <Sequence sap:VirtualizedContainerService.HintSize="376,340" sap2010:WorkflowViewState.IdRef="Sequence_4">
+                  <Sequence.Variables>
+                    <Variable x:TypeArguments="scg:Dictionary(x:String, x:String)" Name="queueItem" />
+                  </Sequence.Variables>
+                  <sap:WorkflowViewStateService.ViewState>
+                    <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                      <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                    </scg:Dictionary>
+                  </sap:WorkflowViewStateService.ViewState>
+                  <ui:Comment sap:VirtualizedContainerService.HintSize="334,55" sap2010:WorkflowViewState.IdRef="Comment_6" Text="// Adding the PO number to the final list" />
+                  <AddToCollection x:TypeArguments="x:String" Collection="[poList]" DisplayName="Add To Collection" sap:VirtualizedContainerService.HintSize="334,22" sap2010:WorkflowViewState.IdRef="AddToCollection`1_2" Item="[item.Value]" />
+                  <ui:LogMessage DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,91" sap2010:WorkflowViewState.IdRef="LogMessage_3" Level="Info" Message="[&quot;Adding to the queue the PO N. &quot; + item.Value]" />
+                </Sequence>
+              </If.Else>
+            </If>
+          </Sequence>
+        </ActivityAction>
+      </ui:ForEach.Body>
+    </ui:ForEach>
+    <Assign sap:VirtualizedContainerService.HintSize="1182,60" sap2010:WorkflowViewState.IdRef="Assign_3">
+      <Assign.To>
+        <OutArgument x:TypeArguments="x:Boolean">[notAllowed]</OutArgument>
+      </Assign.To>
+      <Assign.Value>
+        <InArgument x:TypeArguments="x:Boolean">True</InArgument>
+      </Assign.Value>
+    </Assign>
+    <ui:Comment sap:VirtualizedContainerService.HintSize="1182,74" sap2010:WorkflowViewState.IdRef="Comment_7" Text="// If valid PO has been found in the mail message, add them to the queue" />
+    <ui:ForEach x:TypeArguments="x:String" CurrentIndex="{x:Null}" DisplayName="For Each" sap:VirtualizedContainerService.HintSize="1182,781" sap2010:WorkflowViewState.IdRef="ForEach`1_3" Values="[poList]">
+      <ui:ForEach.Body>
+        <ActivityAction x:TypeArguments="x:String">
+          <ActivityAction.Argument>
+            <DelegateInArgument x:TypeArguments="x:String" Name="item" />
+          </ActivityAction.Argument>
+          <Sequence DisplayName="Body" sap:VirtualizedContainerService.HintSize="797,647" sap2010:WorkflowViewState.IdRef="Sequence_6">
+            <sap:WorkflowViewStateService.ViewState>
+              <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+              </scg:Dictionary>
+            </sap:WorkflowViewStateService.ViewState>
+            <ui:Matches sap:VirtualizedContainerService.HintSize="755,22" sap2010:WorkflowViewState.IdRef="Matches_3" Input="[in_TransactionItem.From.Address.ToString]" Pattern="[in_Config(&quot;WhiteListMailRegex&quot;).ToString]" RegexOption="IgnoreCase, Compiled" Result="[mailMatches]" />
+            <If Condition="[mailMatches.Count() &gt; 0]" DisplayName="If from e-mailaddress matches the whitelist regex" sap:VirtualizedContainerService.HintSize="755,493" sap2010:WorkflowViewState.IdRef="If_5">
+              <If.Then>
+                <Sequence sap:VirtualizedContainerService.HintSize="376,345" sap2010:WorkflowViewState.IdRef="Sequence_9">
+                  <sap:WorkflowViewStateService.ViewState>
+                    <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                      <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                    </scg:Dictionary>
+                  </sap:WorkflowViewStateService.ViewState>
+                  <ui:LogMessage DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,91" sap2010:WorkflowViewState.IdRef="LogMessage_4" Level="Info" Message="[&quot;Whitelist check success. Adding to the queue the address. &quot; + in_TransactionItem.From.Address.ToString]" />
+                  <ui:AddQueueItem ServiceBaseAddress="{x:Null}" TimeoutMS="{x:Null}" DisplayName="Add e-mail in queue" sap:VirtualizedContainerService.HintSize="334,22" sap2010:WorkflowViewState.IdRef="AddQueueItem_1" Priority="Normal" QueueType="[in_Config(&quot;OrchestratorQueueName&quot;).ToString]">
+                    <ui:AddQueueItem.ItemInformation>
+                      <InArgument x:TypeArguments="x:String" x:Key="PONumber">[item]</InArgument>
+                      <InArgument x:TypeArguments="x:String" x:Key="FromAddress">[in_TransactionItem.From.Address.ToString]</InArgument>
+                      <InArgument x:TypeArguments="x:String" x:Key="FromDisplayName">[in_TransactionItem.From.DisplayName.ToString]</InArgument>
+                    </ui:AddQueueItem.ItemInformation>
+                  </ui:AddQueueItem>
+                  <Assign sap:VirtualizedContainerService.HintSize="334,60" sap2010:WorkflowViewState.IdRef="Assign_4">
+                    <Assign.To>
+                      <OutArgument x:TypeArguments="x:Boolean">[notAllowed]</OutArgument>
+                    </Assign.To>
+                    <Assign.Value>
+                      <InArgument x:TypeArguments="x:Boolean">False</InArgument>
+                    </Assign.Value>
+                  </Assign>
+                </Sequence>
+              </If.Then>
+              <If.Else>
+                <ui:LogMessage DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,91" sap2010:WorkflowViewState.IdRef="LogMessage_6" Level="Warn" Message="[&quot;Whitelist rule not satisfied for &quot; + in_TransactionItem.From.Address.ToString + &quot;. Item not added in the queue&quot;]" />
+              </If.Else>
+            </If>
+          </Sequence>
+        </ActivityAction>
+      </ui:ForEach.Body>
+    </ui:ForEach>
+    <If Condition="[(poList.Count &gt; 0) AND (notAllowed = False)]" sap:VirtualizedContainerService.HintSize="1182,1132" sap2010:WorkflowViewState.IdRef="If_7">
+      <If.Then>
+        <ui:Comment sap:VirtualizedContainerService.HintSize="334,74" sap2010:WorkflowViewState.IdRef="Comment_10" Text="// Mail correclty sent, nothing to report to the user" />
+      </If.Then>
+      <If.Else>
+        <If Condition="[poList.Count &lt;= 0]" sap:VirtualizedContainerService.HintSize="803,984" sap2010:WorkflowViewState.IdRef="If_6">
+          <If.Then>
+            <Sequence sap:VirtualizedContainerService.HintSize="376,310" sap2010:WorkflowViewState.IdRef="Sequence_12">
+              <sap:WorkflowViewStateService.ViewState>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                </scg:Dictionary>
+              </sap:WorkflowViewStateService.ViewState>
+              <ui:LogMessage DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="334,91" sap2010:WorkflowViewState.IdRef="LogMessage_7" Level="Error" Message="[&quot;No PO number in the text mail or in the subject&quot;]" />
+              <ui:InvokeWorkflowFile ContinueOnError="{x:Null}" DisplayName="Invoke SendMailToUser workflow" sap:VirtualizedContainerService.HintSize="334,87" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_1" UnSafe="False" WorkflowFileName="Mail\SendMailToUser.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Recipient_Address">[in_TransactionItem.From.Address.ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Recipient_DisplayName">[in_TransactionItem.From.DisplayName.ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_BCC_Mail" />
+                  <InArgument x:TypeArguments="x:String" x:Key="in_SMTP_Server">[in_Config("SMTPServer").ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_SMTP_Port">[in_Config("SMTPPort").ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_SMTP_Credential_Asset_Name">[in_Config("EmailCredentialAssetName").ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Sender_Mail_Address">[in_Config("EmailAccount").ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Subject">Quality Requirement List Report - Error</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Body">No PO has been found during the automatic process of your request. Please send it again checking if the number of the PO you are requesting is correct.</InArgument>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+            </Sequence>
+          </If.Then>
+          <If.Else>
+            <Sequence sap:VirtualizedContainerService.HintSize="382,836" sap2010:WorkflowViewState.IdRef="Sequence_13">
+              <Sequence.Variables>
+                <Variable x:TypeArguments="x:String" Name="subject" />
+              </Sequence.Variables>
+              <sap:WorkflowViewStateService.ViewState>
+                <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                  <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                </scg:Dictionary>
+              </sap:WorkflowViewStateService.ViewState>
+              <ui:LogMessage DisplayName="Log Message" sap:VirtualizedContainerService.HintSize="340,91" sap2010:WorkflowViewState.IdRef="LogMessage_8" Level="Error" Message="[&quot;User &quot; + in_TransactionItem.From.Address.ToString + &quot; not authorized to receive QRL&quot;]" />
+              <Assign sap:VirtualizedContainerService.HintSize="340,60" sap2010:WorkflowViewState.IdRef="Assign_5">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="x:String">[subject]</OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="x:String" xml:space="preserve">Quality Requirement List Report </InArgument>
+                </Assign.Value>
+              </Assign>
+              <ui:ForEach x:TypeArguments="x:String" CurrentIndex="{x:Null}" DisplayName="For Each" sap:VirtualizedContainerService.HintSize="340,286" sap2010:WorkflowViewState.IdRef="ForEach`1_5" Values="[poList]">
+                <ui:ForEach.Body>
+                  <ActivityAction x:TypeArguments="x:String">
+                    <ActivityAction.Argument>
+                      <DelegateInArgument x:TypeArguments="x:String" Name="item" />
+                    </ActivityAction.Argument>
+                    <Sequence DisplayName="Body" sap:VirtualizedContainerService.HintSize="304,152" sap2010:WorkflowViewState.IdRef="Sequence_14">
+                      <sap:WorkflowViewStateService.ViewState>
+                        <scg:Dictionary x:TypeArguments="x:String, x:Object">
+                          <x:Boolean x:Key="IsExpanded">True</x:Boolean>
+                        </scg:Dictionary>
+                      </sap:WorkflowViewStateService.ViewState>
+                      <Assign sap:VirtualizedContainerService.HintSize="262,60" sap2010:WorkflowViewState.IdRef="Assign_6">
+                        <Assign.To>
+                          <OutArgument x:TypeArguments="x:String">[subject]</OutArgument>
+                        </Assign.To>
+                        <Assign.Value>
+                          <InArgument x:TypeArguments="x:String">[subject +" " + item]</InArgument>
+                        </Assign.Value>
+                      </Assign>
+                    </Sequence>
+                  </ActivityAction>
+                </ui:ForEach.Body>
+              </ui:ForEach>
+              <Assign sap:VirtualizedContainerService.HintSize="340,60" sap2010:WorkflowViewState.IdRef="Assign_7">
+                <Assign.To>
+                  <OutArgument x:TypeArguments="x:String">[subject]</OutArgument>
+                </Assign.To>
+                <Assign.Value>
+                  <InArgument x:TypeArguments="x:String">[subject + " - Error"]</InArgument>
+                </Assign.Value>
+              </Assign>
+              <ui:InvokeWorkflowFile ContinueOnError="{x:Null}" DisplayName="Invoke SendMailToUser workflow" sap:VirtualizedContainerService.HintSize="340,87" sap2010:WorkflowViewState.IdRef="InvokeWorkflowFile_2" UnSafe="False" WorkflowFileName="Mail\SendMailToUser.xaml">
+                <ui:InvokeWorkflowFile.Arguments>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Recipient_Address">[in_TransactionItem.From.Address.ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Recipient_DisplayName">[in_TransactionItem.From.DisplayName.ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_BCC_Mail" />
+                  <InArgument x:TypeArguments="x:String" x:Key="in_SMTP_Server">[in_Config("SMTPServer").ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_SMTP_Port">[in_Config("SMTPPort").ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_SMTP_Credential_Asset_Name">[in_Config("EmailCredentialAssetName").ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Sender_Mail_Address">[in_Config("EmailAccount").ToString]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Subject">[subject]</InArgument>
+                  <InArgument x:TypeArguments="x:String" x:Key="in_Body">You are not authorized to request a quality requirement list report.</InArgument>
+                </ui:InvokeWorkflowFile.Arguments>
+              </ui:InvokeWorkflowFile>
+            </Sequence>
+          </If.Else>
+        </If>
+      </If.Else>
+    </If>
+  </Sequence>
+</Activity>
